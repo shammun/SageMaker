@@ -70,13 +70,14 @@ def predict_fn(input_data, model):
     #         data_X   - A sequence of length 500 which represents the converted review
     #         data_len - The length of the review
 
-    data_X, data_len = convert_and_pad(model.word_dict, review_to_words(input_data))
-    
+    data_X = None
+    data_len = None
+
     # Using data_X and data_len we construct an appropriate input tensor. Remember
     # that our model expects input data of the form 'len, review[500]'.
     data_pack = np.hstack((data_len, data_X))
     data_pack = data_pack.reshape(1, -1)
-        
+    
     data = torch.from_numpy(data_pack)
     data = data.to(device)
 
@@ -85,16 +86,23 @@ def predict_fn(input_data, model):
 
     # TODO: Compute the result of applying the model to the input data. The variable `result` should
     #       be a numpy array which contains a single integer which is either 1 or 0
+
+#     with torch.no_grad():
+#         output = model.forward(data)
+#     output = output.to('cpu')
+#     result = np.round(output.numpy())
+#     result = result.astype(int)
     
-#     output = model(data)
-#     result = np.array(round(model(data).item()))
+    
+    # This worked before
+#     result = np.round(output.cpu().numpy()).astype(int)
 
-#     result = np.round(output.data.cpu().numpy())
-
+#     result = np.round(output.numpy()).astype(int)
+   
+    
+    # WIll use this if the above doesn't work
     with torch.no_grad():
         output = model.forward(data)
-    output = output.to('cpu')
     result = np.round(output.numpy())
-    result = int(result)
     
     return result
